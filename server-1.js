@@ -9,12 +9,37 @@ let jsonData = JSON.parse(fs.readFileSync('./data/djt.json', 'utf-8'));
 //console.log('Original Text reads: ' + jsonData[1].text);
 //var twtTextString = jsonData[15].text;
 
-var twtTextString = "This is just testing."
+//var twtTextString = "This is just testing."
 
 
+// MAKE A CALL ...
+//console.log(processLanguage(twtTextString, 'sentiment'));
 
-console.log(processLanguage(twtTextString, 'sentiment'));
 
+// LOOP OVER HIS TWEETS AND SCORE THEM
+var counter = 0;
+var totalscore = 0;
+jsonData.forEach(function(val){
+
+        if (counter < 1000){
+            twtTextString = val.text.split('http')[0].trim();
+            var sentiment_score = processLanguage(twtTextString, 'sentiment');
+
+            var thisScore = parseFloat(JSON.parse(sentiment_score)[0].retVal);
+
+                if (thisScore < 0 || thisScore > 0){
+                    //console.log(counter + ' --- ' + thisScore + ' --- ' + sentiment_score)
+                
+                
+                    totalscore = totalscore + thisScore
+                    console.log(totalscore.toFixed(2)  + ' --- ' + counter + ' --- ' + thisScore/* + ' --- ' + sentiment_score*/)
+                    //console.log(totalscore);
+                }
+            counter++;
+        }
+        return;
+})
+console.log('Average Score of these ' + counter + ' tweets.... ' + totalscore / counter)
 
 
 function processLanguage(inputData, processAction){
@@ -81,7 +106,7 @@ function processLanguage(inputData, processAction){
 
 
     if (processAction === 'sentiment'){
-            console.log(processAction)
+            //console.log(processAction)
             // ACCEPTS ARRAY OF WORDS...
             // SENTIMENT ANALYSIS - OPINION MINING / EMOTION AI
             var Analyzer = natural.SentimentAnalyzer;
@@ -92,13 +117,25 @@ function processLanguage(inputData, processAction){
             //console.log(analyzer.getSentiment(["I", "don't", "want", "to", "play", "with", "you"]));
             //console.log(analyzer.getSentiment(["I", "never", "want", "to", "play", "with", "you"]));
             // console.log('Sentient score: ' + analyzer.getSentiment(myWords));
-                var tokenizer = new natural.WordTokenizer();
-                //console.log(tokenizer.tokenize(twtTextString))
-            //retval = analyzer.getSentiment(xxxxxx);
-            return;
+            var tokenizer = new natural.WordTokenizer();
+
+            var wordsArray = tokenizer.tokenize(twtTextString);
+
+            retVal = analyzer.getSentiment(wordsArray).toFixed(3);
     }
 
-    return {"reval": retVal};
+
+    
+
+    return JSON.stringify(
+        [
+            {
+                "retValType": processAction, 
+                "retVal": retVal, 
+                "originalText": twtTextString
+            }
+        ], null, 0
+    );
 
 }
 
