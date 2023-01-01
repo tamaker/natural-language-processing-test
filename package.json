@@ -9,7 +9,7 @@
   "author": "aamaker",
   "license": "ISC",
   "dependencies": {
-    "natural": "^2.1.5",
+    "natural": "^2.4.5",
     "package.json": "^2.0.1"
   }
 }
